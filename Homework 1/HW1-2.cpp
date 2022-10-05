@@ -31,6 +31,23 @@ int main(void)
 }
 	else{
 		wait(NULL);
+		pid = fork(); //fork 4
+		if(pid==0){
+			cout << "Fork 4. I'm the child " << getpid() << ", my parent is " << getppid() << "." << '\n';
+		}
+		else{
+			wait(NULL);
+			pid = fork(); //fork 6
+			if(pid==0){
+				cout << "Fork 6. I'm the child " << getpid() << ", my parent is " << getppid() << "." << '\n';
+			}
+			else wait(NULL);
+		}
+		pid = fork(); //fork 5
+		if(pid==0){
+			cout << "Fork 5. I'm the child " << getpid() << ", my parent is " << getppid() << "." << '\n';
+		}
+
 	}
 	return 0;
 }
