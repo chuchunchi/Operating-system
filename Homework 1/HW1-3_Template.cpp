@@ -49,6 +49,14 @@ int main(void)
 		* (2) the child process will invoke execvp()
 		* (3) if command included &, parent will not invoke wait()
 		*/
+		if(arg[0]=="exit"){
+			break;
+		}
+		else{
+			pid = fork();
+			if(pid==0) execvp(argv[0],argv);
+			else wait(NULL);
+		}
 		arg.clear();
 		argv_t.clear();
 		for(int i=0;i<argc;i++){
