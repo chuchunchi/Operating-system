@@ -23,6 +23,7 @@ int main(){
 	int t = 0;
 	//vector<int> starttime(N,-1);
 	vector<int> endtime(N,-1);
+	int lastt = arrival[N-1];
 	while(1){
 		for(int i=0;i<N;i++){
 			if(t==arrival[i]){
@@ -38,8 +39,19 @@ int main(){
 	}
 	vector<int> qleft(N,Q);
 	vector<int> tleft = burst;
-	while(!que.empty()){
-		
+	while(1){
+		if(que.empty() && lastt<t){
+			break;
+		}
+		else if(que.empty()){
+			t++;
+			for(int i=0;i<N;i++){
+				if(t==arrival[i]){
+					que.push(i);
+				}
+			}
+			continue;
+		}
 		int curprocess = que.front();
 		qleft[curprocess]--;
 		tleft[curprocess]--;

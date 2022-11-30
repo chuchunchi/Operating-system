@@ -37,6 +37,7 @@ int main(){
 			break;
 		}
 	}
+	int lastt = arrival[N-1];
 	vector<int> qleft(N,Q);
 	vector<int> tleft = burst;
 	int sw = 0;
@@ -68,8 +69,17 @@ int main(){
 		}
 		else{
 			sw = -1;
-			if(FCFSq.empty()){
+			if(FCFSq.empty() && lastt<t){
 				break;
+			}
+			else if(FCFSq.empty()){
+				t++;
+				for(int i=0;i<N;i++){
+					if(t==arrival[i]){
+						que.push(i);
+					}
+				}
+				continue;
 			}
 			int curp = FCFSq.front();
 			tleft[curp]--;

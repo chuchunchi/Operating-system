@@ -20,6 +20,7 @@ int main(){
 	}
 	priority_queue< pair<int,int>, vector<pair<int,int> >, greater<pair<int,int>> > pq;
 	int t = 0;
+	int lastt = arrival[N-1];
 	//vector<int> starttime(N,-1);
 	vector<int> endtime(N,-1);
 	while(1){
@@ -36,21 +37,29 @@ int main(){
 		}
 	}
 	
-	while(!pq.empty()){
+	while(1){
 		int curburst = pq.top().first;
 		int curprocess = pq.top().second;
 		/*if(starttime[curprocess]==-1){
 			starttime[curprocess] = t;
 		}*/
-		pq.pop();
-		curburst--;
-		t++;
-		if(curburst!=0){
-			pq.push(make_pair(curburst,curprocess));
-			
+		if(pq.empty() && lastt<t){
+			break;
+		}
+		else if(pq.empty()){
+			t++;
 		}
 		else{
-			endtime[curprocess] = t;
+			pq.pop();
+			curburst--;
+			t++;
+			if(curburst!=0){
+				pq.push(make_pair(curburst,curprocess));
+				
+			}
+			else{
+				endtime[curprocess] = t;
+			}
 		}
 		for(int i=0;i<N;i++){
 			if(t==arrival[i]){
