@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <queue>
+#include <set>
 /*
 3
 20
@@ -102,6 +103,7 @@ int LRU(){
 			}
 			fault++;
 		}
+		cout << "fault: " << fault << endl;
 	}
 	return fault;
 }
@@ -111,37 +113,29 @@ int LFU(){
 	class Node{
 		public:
 			Node(){
-				prev = NULL;
-				next = NULL;
 			}
-			Node(int k){
+			Node(int k, int clk){
 				key = k;
-				prev = NULL;
-				next = NULL;
+				clock = clk;
 			}
-			Node* prev;
-			Node* next;
 			int key;
+			int clock;
 			FreqList* f;
+			set<pair<int,int> >::iterator sit;
 	};
 	class FreqList{
 		
 		public:
 			FreqList(){
 				freq = -1;
-				head->next = tail;
-				tail->prev = head;
 			}
 			FreqList(int f){
 				freq = f;
-				head->next = tail;
-				tail->prev = head;
 			}
 			FreqList* prevList;
 			FreqList* nextList;
+			set<pair<int,int> > s;
 			int freq;
-			Node* head = new Node();
-			Node* tail = new Node();
 	};
 	
 	unordered_map<int,Node*> lfumap;
@@ -160,10 +154,9 @@ int LFU(){
 			cout << "inside cache" << endl;
 			Node* cur = lfumap[k];
 			FreqList* curList = cur->f;
-			cur->prev->next = cur->next;
-			cur->next->prev = cur->prev;
+			curList->s.erase(cur->sit);
 			
-			//move to "head" of upper freq list
+			//move to the set of upper freq list
 			FreqList* moveto;
 			if(curList->nextList->freq==curList->freq+1){
 				moveto = curList->nextList;
@@ -178,12 +171,8 @@ int LFU(){
 				moveto->nextList = tmpList;
 			}
 			cur->f = moveto;
-			Node* tmp = moveto->head->next;
-			moveto->head->next = cur;
-			cur->prev = moveto->head;
-			cur->next = tmp;
-			tmp->prev = cur;
-			if(curList->head->next==curList->tail){
+			moveto->s.insert(make_pair(cur->clock,k));
+			if(curList->s.size()==0){
 				//current list become NULL list
 				cout << "become NULL list" << endl;
 				curList->nextList->prevList = curList->prevList;
@@ -196,13 +185,12 @@ int LFU(){
 			if(lfumap.size()>=numframe){
 				cout << "cache is full-" << endl;
 				//cache is full->remove lowList->next's tail
-				Node* erase = lowList->nextList->tail->prev;
+				Node* erase = lfumap[lowList->nextList->s.begin()->second];
 				cout << "erase: " << erase->key << endl;
 				lfumap.erase(erase->key);
-				erase->prev->next = erase->next;
-				erase->next->prev = erase->prev;
-				FreqList* curList = erase->f;
-				if(curList->head->next==curList->tail){
+				FreqList* curList = lowList->nextList;
+				curList->s.erase(erase->sit);
+				if(curList->s.size()==0){
 					//current list become NULL list
 					curList->nextList->prevList = curList->prevList;
 					curList->prevList->nextList = curList->nextList;
@@ -224,17 +212,13 @@ int LFU(){
 				newList = lowList->nextList;
 
 			}
-			Node* newnode = new Node(k);
+			Node* newnode = new Node(k,i);
 			lfumap[k] = newnode;
 			newnode->f = newList;
-			Node* tmp = newList->head->next;
-			newList->head->next = newnode;
-			newnode->prev = newList->head;
-			newnode->next = tmp;
-			tmp->prev = newnode;
+			auto ret = newList->s.insert(make_pair(i,k));
+			newnode->sit = ret.first;
 			fault++;
 		}
-		cout << "fault: " << fault << endl;
 		cout << "==================" << endl;
 	}
 	return fault;
