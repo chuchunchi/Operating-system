@@ -7,9 +7,7 @@
 #include <queue>
 #include <set>
 /*
-3
-20
-7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1
+2 10 0 1 1 0 2 1 0 1 0 1
 */
 using namespace std;
 vector<int> inputstr;
@@ -43,6 +41,7 @@ int LRU(){
 	class Node{
 		public:
 			Node(){
+				key = -1;
 				prev = NULL;
 				next = NULL;
 			}
@@ -64,16 +63,19 @@ int LRU(){
 	for(int i=0;i<len;i++){
 		int k = inputstr[i];
 		//inside cache
+		
 		if(lrumap.count(k)>0){
-			Node* tmp = head->next;
-			Node* tmp2 = lrumap[k]->prev;
-			Node* tmp3 = lrumap[k]->next;
-			tmp2->next = tmp3;
-			tmp3->prev = tmp2;
-			head->next = lrumap[k];
-			lrumap[k]->prev = head;
-			lrumap[k]->next = tmp;
-			tmp->prev = lrumap[k];
+			if(head->next!=lrumap[k]){
+				Node* tmp = head->next;
+				Node* tmp2 = lrumap[k]->prev;
+				Node* tmp3 = lrumap[k]->next;
+				tmp2->next = tmp3;
+				tmp3->prev = tmp2;
+				head->next = lrumap[k];
+				lrumap[k]->prev = head;
+				lrumap[k]->next = tmp;
+				tmp->prev = lrumap[k];
+			}
 		}
 		else{
 			if(lrumap.size()<numframe){
@@ -103,7 +105,6 @@ int LRU(){
 			}
 			fault++;
 		}
-		cout << "fault: " << fault << endl;
 	}
 	return fault;
 }
@@ -146,12 +147,12 @@ int LFU(){
 	int fault=0;
 	for(int i=0;i<len;i++){
 		int k = inputstr[i];
-		cout << "k: " << k << " size: " << lfumap.size() << endl;
-		cout << lowList->nextList->freq << " ffffffffffffffffffffffff" << endl;
+		//cout << "k: " << k << " size: " << lfumap.size() << endl;
+		//cout << lowList->nextList->freq << " ffffffffffffffffffffffff" << endl;
 		if(lfumap.count(k)>0){
 			//inside cache
 			//remove from cur list
-			cout << "inside cache" << endl;
+			//cout << "inside cache" << endl;
 			Node* cur = lfumap[k];
 			FreqList* curList = cur->f;
 			curList->s.erase(cur->sit);
@@ -162,7 +163,7 @@ int LFU(){
 				moveto = curList->nextList;
 			}
 			else{
-				cout << "new a new list" << endl;
+				//cout << "new a new list" << endl;
 				moveto = new FreqList(curList->freq+1);
 				FreqList* tmpList = curList->nextList;
 				curList->nextList = moveto;
@@ -174,7 +175,7 @@ int LFU(){
 			moveto->s.insert(make_pair(cur->clock,k));
 			if(curList->s.size()==0){
 				//current list become NULL list
-				cout << "become NULL list" << endl;
+				//cout << "become NULL list" << endl;
 				curList->nextList->prevList = curList->prevList;
 				curList->prevList->nextList = curList->nextList;
 			}
@@ -183,10 +184,10 @@ int LFU(){
 			//not in cache
 			
 			if(lfumap.size()>=numframe){
-				cout << "cache is full-" << endl;
+				//cout << "cache is full-" << endl;
 				//cache is full->remove lowList->next's tail
 				Node* erase = lfumap[lowList->nextList->s.begin()->second];
-				cout << "erase: " << erase->key << endl;
+				//cout << "erase: " << erase->key << endl;
 				lfumap.erase(erase->key);
 				FreqList* curList = lowList->nextList;
 				curList->s.erase(erase->sit);
@@ -198,7 +199,7 @@ int LFU(){
 				//add curnode to freq=0 list's head
 			}
 			//cache is not full->put to list-freq=0's head
-			cout << "put to list-freq=0's head" << endl;
+			//cout << "put to list-freq=0's head" << endl;
 			FreqList* newList;
 			if(lowList->nextList->freq!=0){
 				newList = new FreqList(0);
@@ -219,7 +220,7 @@ int LFU(){
 			newnode->sit = ret.first;
 			fault++;
 		}
-		cout << "==================" << endl;
+		//cout << "==================" << endl;
 	}
 	return fault;
 }
@@ -231,5 +232,7 @@ int main(){
 		cin >> inp;
 		inputstr.push_back(inp);
 	}
-	cout << FIFO() << endl << LRU() << endl << LFU() << endl;
+	cout << FIFO() << endl;
+	cout << LRU() << endl;
+	cout << LFU() << endl;
 }
